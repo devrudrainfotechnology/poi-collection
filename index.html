@@ -12,17 +12,21 @@
         .header { background: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-size: 24px; }
         .header-buttons { display: flex; gap: 10px; }
-        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
-        .btn-primary { background: #3498db; color: white; }
-        .btn-success { background: #27ae60; color: white; }
-        .btn-warning { background: #f39c12; color: white; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; color: white; }
+        .btn-primary { background: #3498db; }
+        .btn-success { background: #27ae60; }
+        .btn-warning { background: #f39c12; }
+        .btn:hover { opacity: 0.8; }
         .container { display: flex; height: calc(100vh - 60px); }
         .map-section { flex: 2; display: flex; flex-direction: column; border-right: 2px solid #ddd; }
         .maps-container { flex: 1; display: flex; flex-direction: column; }
         .map-wrapper { flex: 1; position: relative; border-bottom: 1px solid #ddd; }
         .map-wrapper:last-child { border-bottom: none; }
-        .map-label { position: absolute; top: 10px; left: 10px; background: white; padding: 8px 12px; border-radius: 4px; font-weight: 600; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 14px; }
-        #mainMap, #streetViewFrame { width: 100%; height: 100%; }
+        .map-label { position: absolute; top: 10px; left: 10px; background: white; padding: 8px 12px; border-radius: 4px; font-weight: 600; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 13px; }
+        #mainMap { width: 100%; height: 100%; }
+        #streetViewContainer { width: 100%; height: 100%; position: relative; background: #f0f0f0; }
+        #streetViewFrame { width: 100%; height: 100%; border: none; }
+        .streetview-placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #666; }
         .form-section { flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
@@ -31,20 +35,26 @@
         .coordinate-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
         .btn-block { flex: 1; }
-        .stats { background: white; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .stats { background: white; padding: 15px; border-radius: 4px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .stat-item { text-align: center; padding: 10px; background: #ecf0f1; border-radius: 4px; }
         .stat-value { font-size: 24px; font-weight: bold; }
         .stat-label { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
-        .kml-info { background: #e8f5e9; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 13px; color: #27ae60; display: none; }
-        .instructions { background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        .instructions h3 { margin-bottom: 10px; }
-        .instructions ol { margin-left: 20px; }
-        .alert { padding: 12px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .kml-info { background: #d4edda; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 12px; color: #155724; }
+        .kml-list { max-height: 100px; overflow-y: auto; }
+        .kml-item { padding: 5px; background: white; margin: 5px 0; border-radius: 3px; display: flex; justify-content: space-between; align-items: center; }
+        .kml-item button { background: #e74c3c; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
+        .instructions { background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #ffc107; }
+        .instructions h3 { margin-bottom: 10px; color: #856404; font-size: 14px; }
+        .instructions ol { margin-left: 20px; font-size: 13px; }
+        .instructions li { margin-bottom: 3px; color: #856404; }
+        .alert { padding: 12px; border-radius: 4px; margin-bottom: 15px; display: none; font-size: 13px; }
         .alert-success { background: #d4edda; color: #155724; }
         .alert-danger { background: #f8d7da; color: #721c24; }
         input[type="file"] { display: none; }
-        .map-type-selector { position: absolute; top: 50px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .map-controls { position: absolute; top: 50px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .map-controls label { display: block; margin-bottom: 5px; font-size: 12px; font-weight: 600; }
+        .map-controls select { padding: 5px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px; width: 150px; }
     </style>
 </head>
 <body>
@@ -54,7 +64,7 @@
             <label for="kmlUpload" class="btn btn-primary">
                 <i class="fas fa-upload"></i> Upload KML
             </label>
-            <input type="file" id="kmlUpload" accept=".kml">
+            <input type="file" id="kmlUpload" accept=".kml" multiple>
             <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fas fa-download"></i> Export Excel
             </button>
@@ -65,30 +75,39 @@
         <div class="map-section">
             <div class="maps-container">
                 <div class="map-wrapper">
-                    <div class="map-label">Main Map - Click twice to set coordinates</div>
-                    <div class="map-type-selector">
+                    <div class="map-label"><i class="fas fa-map"></i> Click twice: Blue=Building, Red=Display</div>
+                    <div class="map-controls">
                         <label>Map Type:</label>
                         <select id="mapTypeSelect">
                             <option value="osm">OpenStreetMap</option>
-                            <option value="satellite">Satellite</option>
+                            <option value="satellite">Satellite View</option>
+                            <option value="google">Google Satellite</option>
                         </select>
                     </div>
                     <div id="mainMap"></div>
                 </div>
                 <div class="map-wrapper">
-                    <div class="map-label">Street View</div>
-                    <iframe id="streetViewFrame"></iframe>
+                    <div class="map-label"><i class="fas fa-street-view"></i> Street View</div>
+                    <div id="streetViewContainer">
+                        <iframe id="streetViewFrame"></iframe>
+                        <div class="streetview-placeholder" id="streetViewPlaceholder">
+                            <i class="fas fa-street-view fa-3x" style="color: #ccc;"></i>
+                            <p style="margin-top: 10px;">Click Display location (red marker) to load Street View</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="form-section">
             <div class="instructions">
-                <h3>Quick Guide</h3>
+                <h3><i class="fas fa-info-circle"></i> Quick Guide</h3>
                 <ol>
-                    <li>Click on map → Blue marker (Building)</li>
-                    <li>Click again → Red marker (Display)</li>
-                    <li>Fill form and save</li>
+                    <li><strong>Click on map</strong> → Blue marker (Building)</li>
+                    <li><strong>Click again</strong> → Red marker (Display)</li>
+                    <li><strong>Street View loads</strong> automatically</li>
+                    <li><strong>Upload multiple KMLs</strong> - select multiple files at once</li>
+                    <li><strong>Fill form</strong> and click Save POI</li>
                 </ol>
             </div>
 
@@ -103,7 +122,10 @@
                         <div class="stat-label">This Session</div>
                     </div>
                 </div>
-                <div id="kmlStatus" class="kml-info"></div>
+                <div id="kmlInfo" class="kml-info" style="display:none;">
+                    <strong>Loaded KML Files:</strong>
+                    <div id="kmlList" class="kml-list"></div>
+                </div>
             </div>
 
             <div id="alertBox" class="alert"></div>
@@ -116,12 +138,15 @@
                 <div class="form-group">
                     <label>Category *</label>
                     <select id="category" required>
-                        <option value="">Select</option>
+                        <option value="">Select Category</option>
                         <option>Retail</option>
                         <option>Restaurant</option>
                         <option>Office</option>
                         <option>Bank</option>
                         <option>Hospital</option>
+                        <option>School</option>
+                        <option>Pharmacy</option>
+                        <option>Other</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -141,22 +166,26 @@
                     <input type="text" id="mobile1">
                 </div>
                 <div class="form-group">
-                    <label>Building Coordinates</label>
+                    <label>Building Coordinates (Auto-filled)</label>
                     <div class="coordinate-group">
                         <input type="text" id="buildLat" placeholder="Latitude" readonly>
                         <input type="text" id="buildLon" placeholder="Longitude" readonly>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Display Coordinates</label>
+                    <label>Display Coordinates (Auto-filled)</label>
                     <div class="coordinate-group">
                         <input type="text" id="displayLat" placeholder="Latitude" readonly>
                         <input type="text" id="displayLon" placeholder="Longitude" readonly>
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-success btn-block">Save POI</button>
-                    <button type="button" class="btn btn-warning btn-block" onclick="resetForm()">Reset</button>
+                    <button type="submit" class="btn btn-success btn-block">
+                        <i class="fas fa-save"></i> Save POI
+                    </button>
+                    <button type="button" class="btn btn-warning btn-block" onclick="resetForm()">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
                 </div>
             </form>
         </div>
@@ -165,49 +194,119 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-console.log('Initializing...');
-let map, streetViewFrame, buildingMarker, displayMarker, kmlLayer, clickCount = 0, poiData = [], sessionCount = 0, currentTileLayer;
+console.log('POI Collector starting...');
+
+let map, buildingMarker, displayMarker, clickCount = 0, poiData = [], sessionCount = 0, currentTileLayer;
+let kmlLayers = []; // Array to hold multiple KML layers
+let loadedKMLFiles = []; // Track loaded KML files
 
 window.onload = function() {
-    console.log('Page loaded');
+    console.log('Initializing map...');
     try {
+        // Initialize map
         map = L.map('mainMap').setView([20.5937, 78.9629], 5);
-        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
-        map.on('click', e => {
-            const lat = e.latlng.lat.toFixed(6), lng = e.latlng.lng.toFixed(6);
+        
+        // Add OpenStreetMap tiles
+        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Map click handler
+        map.on('click', function(e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            console.log('Map clicked:', lat, lng);
+            
             if (clickCount === 0) {
+                // First click - Building (Blue marker)
                 if (buildingMarker) map.removeLayer(buildingMarker);
+                
                 buildingMarker = L.marker([lat, lng], {
-                    icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41]})
-                }).addTo(map);
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map).bindPopup('🔵 Building Location').openPopup();
+                
                 document.getElementById('buildLat').value = lat;
                 document.getElementById('buildLon').value = lng;
+                localStorage.setItem('lastBuildLat', lat);
+                localStorage.setItem('lastBuildLng', lng);
                 clickCount = 1;
-                showAlert('Building location set!', 'success');
-            } else {
+                showAlert('✓ Building location saved! Click again for Display location.', 'success');
+                
+            } else if (clickCount === 1) {
+                // Second click - Display (Red marker)
                 if (displayMarker) map.removeLayer(displayMarker);
+                
                 displayMarker = L.marker([lat, lng], {
-                    icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41]})
-                }).addTo(map);
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map).bindPopup('🔴 Display Location').openPopup();
+                
                 document.getElementById('displayLat').value = lat;
                 document.getElementById('displayLon').value = lng;
-                document.getElementById('streetViewFrame').src = `https://www.google.com/maps/@${lat},${lng},3a,75y,0h,90t/data=!3m6!1e1`;
+                localStorage.setItem('lastDisplayLat', lat);
+                localStorage.setItem('lastDisplayLng', lng);
+                
+                // Load Street View
+                loadStreetView(lat, lng);
+                
                 clickCount = 0;
-                showAlert('Display location set!', 'success');
+                showAlert('✓ Display location saved! Street View loaded. Fill form and save.', 'success');
+                document.getElementById('poiName').focus();
             }
         });
         
+        // Map type selector
         document.getElementById('mapTypeSelect').onchange = function() {
             if (currentTileLayer) map.removeLayer(currentTileLayer);
-            if (this.value === 'satellite') {
-                currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom: 19}).addTo(map);
-            } else {
-                currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
+            
+            switch(this.value) {
+                case 'osm':
+                    currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap', maxZoom: 19
+                    }).addTo(map);
+                    break;
+                case 'satellite':
+                    currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Esri, DigitalGlobe', maxZoom: 19
+                    }).addTo(map);
+                    break;
+                case 'google':
+                    currentTileLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                        attribution: '© Google'
+                    }).addTo(map);
+                    break;
             }
+            showAlert('Map type changed to ' + this.options[this.selectedIndex].text, 'success');
         };
         
+        // Form submission
         document.getElementById('poiForm').onsubmit = function(e) {
             e.preventDefault();
+            
+            const buildLat = document.getElementById('buildLat').value;
+            const buildLon = document.getElementById('buildLon').value;
+            const displayLat = document.getElementById('displayLat').value;
+            const displayLon = document.getElementById('displayLon').value;
+            
+            if (!buildLat || !buildLon || !displayLat || !displayLon) {
+                showAlert('⚠ Please set both Building and Display locations on map!', 'danger');
+                return;
+            }
+            
             const poi = {
                 POI_NAME: document.getElementById('poiName').value,
                 CATEGORY: document.getElementById('category').value,
@@ -215,135 +314,356 @@ window.onload = function() {
                 LANDLINE: document.getElementById('landline').value,
                 MOBILE: document.getElementById('mobile').value,
                 MOBILE_1: document.getElementById('mobile1').value,
-                BUILD_LAT: document.getElementById('buildLat').value,
-                BUILD_LON: document.getElementById('buildLon').value,
-                DISPLAY_LAT: document.getElementById('displayLat').value,
-                DISPLAY_LON: document.getElementById('displayLon').value,
-                TIMESTAMP: new Date().toISOString()
+                BUILD_LAT: buildLat,
+                BUILD_LON: buildLon,
+                DISPLAY_LAT: displayLat,
+                DISPLAY_LON: displayLon,
+                TIMESTAMP: new Date().toISOString(),
+                DATE: new Date().toLocaleDateString('en-IN')
             };
+            
             poiData.push(poi);
             sessionCount++;
             localStorage.setItem('poiData', JSON.stringify(poiData));
-            showAlert(`POI saved! Total: ${poiData.length}`, 'success');
+            
             document.getElementById('totalPOIs').textContent = poiData.length;
             document.getElementById('sessionPOIs').textContent = sessionCount;
+            
+            showAlert(`✓ POI "${poi.POI_NAME}" saved! Total: ${poiData.length}`, 'success');
             resetForm();
         };
         
+        // KML Upload - MULTIPLE FILES SUPPORT
         document.getElementById('kmlUpload').onchange = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
-                    if (kmlLayer) map.removeLayer(kmlLayer);
-                    kmlLayer = L.layerGroup().addTo(map);
-                    const placemarks = xmlDoc.getElementsByTagName('Placemark');
-                    let count = 0, allBounds = [];
-                    for (let i = 0; i < placemarks.length; i++) {
-                        const placemark = placemarks[i];
-                        const name = placemark.getElementsByTagName('name')[0]?.textContent || 'Feature';
-                        const point = placemark.getElementsByTagName('Point')[0];
-                        if (point) {
-                            const coords = point.getElementsByTagName('coordinates')[0]?.textContent;
-                            if (coords) {
-                                const parts = coords.trim().split(',');
-                                const lng = parseFloat(parts[0]), lat = parseFloat(parts[1]);
-                                if (!isNaN(lat) && !isNaN(lng)) {
-                                    L.marker([lat, lng], {
-                                        icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41]})
-                                    }).addTo(kmlLayer).bindPopup(name);
-                                    allBounds.push([lat, lng]);
-                                    count++;
-                                }
-                            }
-                        }
-                        const polygon = placemark.getElementsByTagName('Polygon')[0];
-                        if (polygon) {
-                            const linearRing = polygon.getElementsByTagName('LinearRing')[0];
-                            if (linearRing) {
-                                const coords = linearRing.getElementsByTagName('coordinates')[0]?.textContent;
-                                if (coords) {
-                                    const latlngs = [];
-                                    coords.trim().split(/\s+/).forEach(pair => {
-                                        const parts = pair.split(',');
-                                        if (parts.length >= 2) {
-                                            const lng = parseFloat(parts[0]), lat = parseFloat(parts[1]);
-                                            if (!isNaN(lat) && !isNaN(lng)) {
-                                                latlngs.push([lat, lng]);
-                                                allBounds.push([lat, lng]);
-                                            }
-                                        }
-                                    });
-                                    if (latlngs.length >= 3) {
-                                        L.polygon(latlngs, {color: '#27ae60', fillColor: '#2ecc71', fillOpacity: 0.35, weight: 3}).addTo(kmlLayer).bindPopup(name);
-                                        count++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    document.getElementById('kmlStatus').textContent = `${file.name}: ${count} features loaded`;
-                    document.getElementById('kmlStatus').style.display = 'block';
-                    showAlert(`KML loaded: ${count} features`, 'success');
-                    if (allBounds.length > 0) setTimeout(() => map.fitBounds(L.latLngBounds(allBounds), {padding: [50, 50], maxZoom: 15}), 200);
-                } catch(error) {
-                    showAlert('Error loading KML', 'danger');
-                    console.error(error);
-                }
-            };
-            reader.readAsText(file);
+            const files = e.target.files;
+            if (files.length === 0) return;
+            
+            console.log(`Loading ${files.length} KML file(s)...`);
+            
+            for (let i = 0; i < files.length; i++) {
+                loadKMLFile(files[i]);
+            }
         };
         
+        // Load saved POIs
         const saved = localStorage.getItem('poiData');
         if (saved) {
             poiData = JSON.parse(saved);
             document.getElementById('totalPOIs').textContent = poiData.length;
         }
         
-        console.log('✓ Map ready!');
-        showAlert('✓ Map loaded! Click to start.', 'success');
-    } catch(e) {
-        console.error('Init error:', e);
-        showAlert('Error loading map. Please refresh.', 'danger');
+        console.log('✓ Map initialized successfully!');
+        showAlert('✓ Map loaded! Click on map to start collecting POI data.', 'success');
+        
+    } catch(error) {
+        console.error('Initialization error:', error);
+        showAlert('❌ Error loading map. Please refresh the page.', 'danger');
     }
 };
 
+// Load Street View - FIXED VERSION
+function loadStreetView(lat, lng) {
+    console.log('Loading Street View for:', lat, lng);
+    
+    const placeholder = document.getElementById('streetViewPlaceholder');
+    const frame = document.getElementById('streetViewFrame');
+    
+    // Hide placeholder, show iframe
+    placeholder.style.display = 'none';
+    frame.style.display = 'block';
+    
+    // Load Google Street View
+    // Using embed URL that works in iframe
+    frame.src = `https://www.google.com/maps/embed/v1/streetview?key=AIzaSyDUBimqd5FsO7QzS3VYkWzJ5OZL2k-GsYo&location=${lat},${lng}&heading=0&pitch=0&fov=90`;
+    
+    console.log('✓ Street View loaded');
+}
+
+// Load KML File - ENHANCED WITH BRIGHT COLORS
+function loadKMLFile(file) {
+    console.log('Loading KML:', file.name);
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+            
+            // Check for errors
+            const parseError = xmlDoc.getElementsByTagName('parsererror');
+            if (parseError.length > 0) {
+                showAlert(`❌ Error in ${file.name}: Invalid XML format`, 'danger');
+                return;
+            }
+            
+            // Create new layer group for this KML
+            const kmlLayer = L.layerGroup().addTo(map);
+            kmlLayers.push(kmlLayer);
+            
+            const placemarks = xmlDoc.getElementsByTagName('Placemark');
+            let pointCount = 0, polygonCount = 0, lineCount = 0;
+            const allBounds = [];
+            
+            // Process each placemark
+            for (let i = 0; i < placemarks.length; i++) {
+                const placemark = placemarks[i];
+                const name = placemark.getElementsByTagName('name')[0]?.textContent || `Feature ${i+1}`;
+                const description = placemark.getElementsByTagName('description')[0]?.textContent || '';
+                
+                // POINTS - GREEN MARKERS
+                const point = placemark.getElementsByTagName('Point')[0];
+                if (point) {
+                    const coords = point.getElementsByTagName('coordinates')[0]?.textContent;
+                    if (coords) {
+                        const parts = coords.trim().split(',');
+                        const lng = parseFloat(parts[0]);
+                        const lat = parseFloat(parts[1]);
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const marker = L.marker([lat, lng], {
+                                icon: L.icon({
+                                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                    iconSize: [25, 41],
+                                    iconAnchor: [12, 41],
+                                    shadowSize: [41, 41]
+                                })
+                            }).addTo(kmlLayer);
+                            
+                            marker.bindPopup(`<b style="color: #27ae60;">📍 ${name}</b><br>${description}<br><small>Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</small>`);
+                            allBounds.push([lat, lng]);
+                            pointCount++;
+                        }
+                    }
+                }
+                
+                // POLYGONS - BRIGHT GREEN WITH HIGH OPACITY
+                const polygon = placemark.getElementsByTagName('Polygon')[0];
+                if (polygon) {
+                    const linearRing = polygon.getElementsByTagName('LinearRing')[0];
+                    if (linearRing) {
+                        const coords = linearRing.getElementsByTagName('coordinates')[0]?.textContent;
+                        if (coords) {
+                            const latlngs = [];
+                            const coordPairs = coords.trim().split(/\s+/);
+                            
+                            coordPairs.forEach(pair => {
+                                const parts = pair.split(',');
+                                if (parts.length >= 2) {
+                                    const lng = parseFloat(parts[0]);
+                                    const lat = parseFloat(parts[1]);
+                                    if (!isNaN(lat) && !isNaN(lng)) {
+                                        latlngs.push([lat, lng]);
+                                        allBounds.push([lat, lng]);
+                                    }
+                                }
+                            });
+                            
+                            if (latlngs.length >= 3) {
+                                // BRIGHT, VISIBLE POLYGON
+                                const poly = L.polygon(latlngs, {
+                                    color: '#00FF00',        // Bright green border
+                                    fillColor: '#00FF00',    // Bright green fill
+                                    fillOpacity: 0.5,        // 50% opacity - VERY VISIBLE
+                                    weight: 4,               // Thick border
+                                    opacity: 1               // Full border opacity
+                                }).addTo(kmlLayer);
+                                
+                                poly.bindPopup(`<b style="color: #00aa00;">⬟ ${name}</b><br>${description}<br><small>${latlngs.length} vertices</small>`);
+                                
+                                // Hover effect - even brighter
+                                poly.on('mouseover', function() {
+                                    this.setStyle({
+                                        fillOpacity: 0.7,
+                                        weight: 6
+                                    });
+                                });
+                                poly.on('mouseout', function() {
+                                    this.setStyle({
+                                        fillOpacity: 0.5,
+                                        weight: 4
+                                    });
+                                });
+                                
+                                polygonCount++;
+                            }
+                        }
+                    }
+                }
+                
+                // LINES - BRIGHT BLUE
+                const lineString = placemark.getElementsByTagName('LineString')[0];
+                if (lineString) {
+                    const coords = lineString.getElementsByTagName('coordinates')[0]?.textContent;
+                    if (coords) {
+                        const latlngs = [];
+                        const coordPairs = coords.trim().split(/\s+/);
+                        
+                        coordPairs.forEach(pair => {
+                            const parts = pair.split(',');
+                            if (parts.length >= 2) {
+                                const lng = parseFloat(parts[0]);
+                                const lat = parseFloat(parts[1]);
+                                if (!isNaN(lat) && !isNaN(lng)) {
+                                    latlngs.push([lat, lng]);
+                                    allBounds.push([lat, lng]);
+                                }
+                            }
+                        });
+                        
+                        if (latlngs.length >= 2) {
+                            const line = L.polyline(latlngs, {
+                                color: '#0099FF',    // Bright blue
+                                weight: 4,
+                                opacity: 1
+                            }).addTo(kmlLayer);
+                            
+                            line.bindPopup(`<b style="color: #0099FF;">━ ${name}</b><br>${description}<br><small>${latlngs.length} points</small>`);
+                            lineCount++;
+                        }
+                    }
+                }
+            }
+            
+            // Record loaded file
+            const totalFeatures = pointCount + polygonCount + lineCount;
+            loadedKMLFiles.push({
+                name: file.name,
+                layer: kmlLayer,
+                points: pointCount,
+                polygons: polygonCount,
+                lines: lineCount
+            });
+            
+            // Update UI
+            updateKMLList();
+            
+            // Show info
+            console.log(`✓ ${file.name} loaded: ${pointCount} points, ${polygonCount} polygons, ${lineCount} lines`);
+            showAlert(`✓ ${file.name} loaded: ${totalFeatures} features`, 'success');
+            
+            // Zoom to fit all features
+            if (allBounds.length > 0) {
+                setTimeout(() => {
+                    try {
+                        map.fitBounds(L.latLngBounds(allBounds), {
+                            padding: [50, 50],
+                            maxZoom: 15
+                        });
+                    } catch(e) {
+                        console.log('Could not fit bounds');
+                    }
+                }, 200);
+            }
+            
+        } catch(error) {
+            console.error('KML load error:', error);
+            showAlert(`❌ Error loading ${file.name}: ${error.message}`, 'danger');
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+// Update KML file list
+function updateKMLList() {
+    const kmlInfo = document.getElementById('kmlInfo');
+    const kmlList = document.getElementById('kmlList');
+    
+    if (loadedKMLFiles.length === 0) {
+        kmlInfo.style.display = 'none';
+        return;
+    }
+    
+    kmlInfo.style.display = 'block';
+    kmlList.innerHTML = '';
+    
+    loadedKMLFiles.forEach((kml, index) => {
+        const item = document.createElement('div');
+        item.className = 'kml-item';
+        item.innerHTML = `
+            <span><strong>${kml.name}</strong> - ${kml.points}pts, ${kml.polygons}poly, ${kml.lines}lines</span>
+            <button onclick="removeKML(${index})">Remove</button>
+        `;
+        kmlList.appendChild(item);
+    });
+}
+
+// Remove KML layer
+function removeKML(index) {
+    const kml = loadedKMLFiles[index];
+    map.removeLayer(kml.layer);
+    loadedKMLFiles.splice(index, 1);
+    kmlLayers.splice(index, 1);
+    updateKMLList();
+    showAlert(`Removed ${kml.name}`, 'success');
+}
+
+// Reset form
 function resetForm() {
     document.getElementById('poiForm').reset();
     document.getElementById('buildLat').value = '';
     document.getElementById('buildLon').value = '';
     document.getElementById('displayLat').value = '';
     document.getElementById('displayLon').value = '';
-    if (buildingMarker) { map.removeLayer(buildingMarker); buildingMarker = null; }
-    if (displayMarker) { map.removeLayer(displayMarker); displayMarker = null; }
+    
+    if (buildingMarker) {
+        map.removeLayer(buildingMarker);
+        buildingMarker = null;
+    }
+    if (displayMarker) {
+        map.removeLayer(displayMarker);
+        displayMarker = null;
+    }
+    
     clickCount = 0;
+    document.getElementById('poiName').focus();
 }
 
+// Export to Excel
 function exportToExcel() {
-    if (poiData.length === 0) return showAlert('No data to export!', 'danger');
+    if (poiData.length === 0) {
+        showAlert('⚠ No data to export! Please collect some POIs first.', 'danger');
+        return;
+    }
+    
+    const exportData = poiData.map(poi => ({
+        'POI_NAME': poi.POI_NAME,
+        'CATEGORY': poi.CATEGORY,
+        'SUB_CAT': poi.SUB_CAT,
+        'LANDLINE': poi.LANDLINE,
+        'MOBILE': poi.MOBILE,
+        'MOBILE_1': poi.MOBILE_1,
+        'BUILD_LATE': poi.BUILD_LAT,
+        'BUILD_LONE': poi.BUILD_LON,
+        'DISPLAY_LATE': poi.DISPLAY_LAT,
+        'DISPLAY_LONE': poi.DISPLAY_LON,
+        'DATE_COLLECTED': poi.DATE || '',
+        'TIMESTAMP': poi.TIMESTAMP
+    }));
+    
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(poiData.map(poi => ({
-        POI_NAME: poi.POI_NAME, CATEGORY: poi.CATEGORY, SUB_CAT: poi.SUB_CAT,
-        LANDLINE: poi.LANDLINE, MOBILE: poi.MOBILE, MOBILE_1: poi.MOBILE_1,
-        BUILD_LATE: poi.BUILD_LAT, BUILD_LONE: poi.BUILD_LON,
-        DISPLAY_LATE: poi.DISPLAY_LAT, DISPLAY_LONE: poi.DISPLAY_LON,
-        TIMESTAMP: poi.TIMESTAMP
-    })));
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    ws['!cols'] = Array(12).fill({ wch: 15 });
     XLSX.utils.book_append_sheet(wb, ws, 'POI Data');
-    XLSX.writeFile(wb, `POI_Data_${new Date().toISOString().split('T')[0]}.xlsx`);
-    showAlert(`Exported ${poiData.length} POIs`, 'success');
+    
+    const date = new Date().toISOString().split('T')[0];
+    const filename = `POI_Data_${date}.xlsx`;
+    
+    XLSX.writeFile(wb, filename);
+    showAlert(`✓ Excel exported! ${poiData.length} POIs saved to ${filename}`, 'success');
 }
 
-function showAlert(msg, type) {
-    const alert = document.getElementById('alertBox');
-    alert.className = `alert alert-${type}`;
-    alert.textContent = msg;
-    alert.style.display = 'block';
-    setTimeout(() => alert.style.display = 'none', 4000);
+// Show alert
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.className = `alert alert-${type}`;
+    alertBox.textContent = message;
+    alertBox.style.display = 'block';
+    setTimeout(() => alertBox.style.display = 'none', 4000);
 }
+
+console.log('✓ POI Collector ready!');
     </script>
 </body>
 </html>
