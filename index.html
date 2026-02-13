@@ -3,410 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POI Data Collector - Fixed Version</title>
+    <title>POI Data Collector</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .container {
-            display: flex;
-            height: calc(100vh - 60px);
-        }
-
-        .map-section {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            border-right: 2px solid #ddd;
-        }
-
-        .maps-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .map-wrapper {
-            flex: 1;
-            position: relative;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .map-wrapper:last-child {
-            border-bottom: none;
-        }
-
-        .map-label {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-weight: 600;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 14px;
-        }
-
-        .satellite-date-info {
-            position: absolute;
-            top: 50px;
-            left: 10px;
-            background: rgba(255, 193, 7, 0.95);
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-weight: 600;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 12px;
-            color: #000;
-        }
-
-        #mainMap, #streetViewFrame {
-            width: 100%;
-            height: 100%;
-        }
-
-        .form-section {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 13px;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: border 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .form-group input[readonly] {
-            background: #ecf0f1;
-            cursor: not-allowed;
-        }
-
-        .coordinate-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-block {
-            flex: 1;
-        }
-
-        .stats {
-            background: white;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 10px;
-            background: #ecf0f1;
-            border-radius: 4px;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
-
-        .kml-info {
-            background: #e8f5e9;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-            font-size: 13px;
-            color: #27ae60;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-
-        .close {
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #7f8c8d;
-        }
-
-        .close:hover {
-            color: #2c3e50;
-        }
-
-        .instructions {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            border-left: 4px solid #f39c12;
-        }
-
-        .instructions h3 {
-            margin-bottom: 10px;
-            color: #856404;
-        }
-
-        .instructions ol {
-            margin-left: 20px;
-        }
-
-        .instructions li {
-            margin-bottom: 5px;
-            color: #856404;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-
-        .category-input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .category-input-group input {
-            flex: 1;
-        }
-
-        .category-input-group button {
-            padding: 10px 15px;
-            background: #27ae60;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .category-input-group button:hover {
-            background: #229954;
-        }
-
-        #categoryList {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
-        }
-
-        .category-item {
-            padding: 5px 10px;
-            background: white;
-            margin-bottom: 5px;
-            border-radius: 3px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .category-item button {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        .map-type-selector {
-            position: absolute;
-            top: 90px;
-            left: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .map-type-selector label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .map-type-selector select {
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            font-size: 12px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; height: 100vh; overflow: hidden; }
+        .header { background: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; }
+        .header-buttons { display: flex; gap: 10px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .container { display: flex; height: calc(100vh - 60px); }
+        .map-section { flex: 2; display: flex; flex-direction: column; border-right: 2px solid #ddd; }
+        .maps-container { flex: 1; display: flex; flex-direction: column; }
+        .map-wrapper { flex: 1; position: relative; border-bottom: 1px solid #ddd; }
+        .map-wrapper:last-child { border-bottom: none; }
+        .map-label { position: absolute; top: 10px; left: 10px; background: white; padding: 8px 12px; border-radius: 4px; font-weight: 600; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 14px; }
+        #mainMap, #streetViewFrame { width: 100%; height: 100%; }
+        .form-section { flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-group input[readonly] { background: #ecf0f1; }
+        .coordinate-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-block { flex: 1; }
+        .stats { background: white; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .stat-item { text-align: center; padding: 10px; background: #ecf0f1; border-radius: 4px; }
+        .stat-value { font-size: 24px; font-weight: bold; }
+        .stat-label { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+        .kml-info { background: #e8f5e9; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 13px; color: #27ae60; display: none; }
+        .instructions { background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .instructions h3 { margin-bottom: 10px; }
+        .instructions ol { margin-left: 20px; }
+        .alert { padding: 12px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        input[type="file"] { display: none; }
+        .map-type-selector { position: absolute; top: 50px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
     <div class="header">
         <h1><i class="fas fa-map-marked-alt"></i> POI Data Collector</h1>
         <div class="header-buttons">
-            <button class="btn btn-warning" onclick="showInstructions()">
-                <i class="fas fa-question-circle"></i> Help
-            </button>
             <label for="kmlUpload" class="btn btn-primary">
                 <i class="fas fa-upload"></i> Upload KML
             </label>
-            <input type="file" id="kmlUpload" accept=".kml" onchange="loadKML(event)">
+            <input type="file" id="kmlUpload" accept=".kml">
             <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fas fa-download"></i> Export Excel
             </button>
@@ -417,42 +65,30 @@
         <div class="map-section">
             <div class="maps-container">
                 <div class="map-wrapper">
-                    <div class="map-label">
-                        <i class="fas fa-map"></i> Main Map (Click to set coordinates)
-                    </div>
-                    <div class="satellite-date-info">
-                        ⚠️ Check image date in Google Earth: Right-click → Show historical imagery
-                    </div>
+                    <div class="map-label">Main Map - Click twice to set coordinates</div>
                     <div class="map-type-selector">
                         <label>Map Type:</label>
-                        <select id="mapTypeSelect" onchange="changeMapType()">
+                        <select id="mapTypeSelect">
                             <option value="osm">OpenStreetMap</option>
-                            <option value="satellite">Satellite (Esri)</option>
-                            <option value="google-satellite">Google Satellite</option>
+                            <option value="satellite">Satellite</option>
                         </select>
                     </div>
                     <div id="mainMap"></div>
                 </div>
                 <div class="map-wrapper">
-                    <div class="map-label">
-                        <i class="fas fa-street-view"></i> Street View
-                    </div>
-                    <iframe id="streetViewFrame" frameborder="0"></iframe>
+                    <div class="map-label">Street View</div>
+                    <iframe id="streetViewFrame"></iframe>
                 </div>
             </div>
         </div>
 
         <div class="form-section">
             <div class="instructions">
-                <h3><i class="fas fa-info-circle"></i> Quick Guide</h3>
+                <h3>Quick Guide</h3>
                 <ol>
-                    <li>Select map type (OpenStreetMap or Satellite)</li>
-                    <li>Click on map to set Building Location (Blue Marker)</li>
-                    <li>Click again to set Display Location (Red Marker)</li>
-                    <li>Street View will auto-update</li>
-                    <li>Add custom category if needed</li>
-                    <li>Fill in POI details</li>
-                    <li>Click "Save POI"</li>
+                    <li>Click on map → Blue marker (Building)</li>
+                    <li>Click again → Red marker (Display)</li>
+                    <li>Fill form and save</li>
                 </ol>
             </div>
 
@@ -467,9 +103,7 @@
                         <div class="stat-label">This Session</div>
                     </div>
                 </div>
-                <div id="kmlStatus" class="kml-info" style="display:none;">
-                    <i class="fas fa-check-circle"></i> <span id="kmlFileName"></span>
-                </div>
+                <div id="kmlStatus" class="kml-info"></div>
             </div>
 
             <div id="alertBox" class="alert"></div>
@@ -479,101 +113,237 @@
                     <label>POI Name *</label>
                     <input type="text" id="poiName" required>
                 </div>
-
                 <div class="form-group">
                     <label>Category *</label>
                     <select id="category" required>
-                        <option value="">Select Category</option>
+                        <option value="">Select</option>
+                        <option>Retail</option>
+                        <option>Restaurant</option>
+                        <option>Office</option>
+                        <option>Bank</option>
+                        <option>Hospital</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label>Add Custom Category</label>
-                    <div class="category-input-group">
-                        <input type="text" id="newCategory" placeholder="Enter new category">
-                        <button type="button" onclick="addCategory()">Add</button>
-                    </div>
-                    <div id="categoryList"></div>
-                </div>
-
                 <div class="form-group">
                     <label>Sub Category</label>
                     <input type="text" id="subCat">
                 </div>
-
                 <div class="form-group">
                     <label>Landline</label>
                     <input type="text" id="landline">
                 </div>
-
                 <div class="form-group">
                     <label>Mobile</label>
                     <input type="text" id="mobile">
                 </div>
-
                 <div class="form-group">
                     <label>Mobile 1</label>
                     <input type="text" id="mobile1">
                 </div>
-
                 <div class="form-group">
-                    <label>Building Coordinates (Click on map - Blue Marker)</label>
+                    <label>Building Coordinates</label>
                     <div class="coordinate-group">
                         <input type="text" id="buildLat" placeholder="Latitude" readonly>
                         <input type="text" id="buildLon" placeholder="Longitude" readonly>
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <label>Display Coordinates (Click again - Red Marker)</label>
+                    <label>Display Coordinates</label>
                     <div class="coordinate-group">
                         <input type="text" id="displayLat" placeholder="Latitude" readonly>
                         <input type="text" id="displayLon" placeholder="Longitude" readonly>
                     </div>
                 </div>
-
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-success btn-block">
-                        <i class="fas fa-save"></i> Save POI
-                    </button>
-                    <button type="button" class="btn btn-warning btn-block" onclick="resetForm()">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
+                    <button type="submit" class="btn btn-success btn-block">Save POI</button>
+                    <button type="button" class="btn btn-warning btn-block" onclick="resetForm()">Reset</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Instructions Modal -->
-    <div id="instructionsModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeInstructions()">&times;</span>
-            <h2><i class="fas fa-book"></i> Complete Instructions</h2>
-            <h3>Getting Started:</h3>
-            <ol>
-                <li><strong>Choose Map Type:</strong> Select OpenStreetMap or Satellite view</li>
-                <li><strong>Upload KML (Optional):</strong> Click "Upload KML" to load existing POI markers</li>
-                <li><strong>Navigate Map:</strong> Use mouse wheel to zoom, drag to pan</li>
-                <li><strong>Set Building Location:</strong> Click on the building (Blue marker appears)</li>
-                <li><strong>Set Display Location:</strong> Click on the sign/display (Red marker appears)</li>
-                <li><strong>Street View:</strong> Automatically updates to show location</li>
-                <li><strong>Add Categories:</strong> Type new category and click "Add"</li>
-                <li><strong>Fill Form:</strong> Enter POI details</li>
-                <li><strong>Save:</strong> Click "Save POI"</li>
-                <li><strong>Export:</strong> Click "Export Excel" to download data</li>
-            </ol>
-            <h3>Checking Satellite Image Date:</h3>
-            <ul>
-                <li>For accurate dates, use Google Earth Pro (free desktop app)</li>
-                <li>In Google Earth: View → Historical Imagery</li>
-                <li>Slider shows available image dates</li>
-                <li>Look for images after May 2023</li>
-            </ul>
-        </div>
-    </div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="app-final.js"></script>
+    <script>
+console.log('Initializing...');
+let map, streetViewFrame, buildingMarker, displayMarker, kmlLayer, clickCount = 0, poiData = [], sessionCount = 0, currentTileLayer;
+
+window.onload = function() {
+    console.log('Page loaded');
+    try {
+        map = L.map('mainMap').setView([20.5937, 78.9629], 5);
+        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
+        map.on('click', e => {
+            const lat = e.latlng.lat.toFixed(6), lng = e.latlng.lng.toFixed(6);
+            if (clickCount === 0) {
+                if (buildingMarker) map.removeLayer(buildingMarker);
+                buildingMarker = L.marker([lat, lng], {
+                    icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41]})
+                }).addTo(map);
+                document.getElementById('buildLat').value = lat;
+                document.getElementById('buildLon').value = lng;
+                clickCount = 1;
+                showAlert('Building location set!', 'success');
+            } else {
+                if (displayMarker) map.removeLayer(displayMarker);
+                displayMarker = L.marker([lat, lng], {
+                    icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41]})
+                }).addTo(map);
+                document.getElementById('displayLat').value = lat;
+                document.getElementById('displayLon').value = lng;
+                document.getElementById('streetViewFrame').src = `https://www.google.com/maps/@${lat},${lng},3a,75y,0h,90t/data=!3m6!1e1`;
+                clickCount = 0;
+                showAlert('Display location set!', 'success');
+            }
+        });
+        
+        document.getElementById('mapTypeSelect').onchange = function() {
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+            if (this.value === 'satellite') {
+                currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom: 19}).addTo(map);
+            } else {
+                currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
+            }
+        };
+        
+        document.getElementById('poiForm').onsubmit = function(e) {
+            e.preventDefault();
+            const poi = {
+                POI_NAME: document.getElementById('poiName').value,
+                CATEGORY: document.getElementById('category').value,
+                SUB_CAT: document.getElementById('subCat').value,
+                LANDLINE: document.getElementById('landline').value,
+                MOBILE: document.getElementById('mobile').value,
+                MOBILE_1: document.getElementById('mobile1').value,
+                BUILD_LAT: document.getElementById('buildLat').value,
+                BUILD_LON: document.getElementById('buildLon').value,
+                DISPLAY_LAT: document.getElementById('displayLat').value,
+                DISPLAY_LON: document.getElementById('displayLon').value,
+                TIMESTAMP: new Date().toISOString()
+            };
+            poiData.push(poi);
+            sessionCount++;
+            localStorage.setItem('poiData', JSON.stringify(poiData));
+            showAlert(`POI saved! Total: ${poiData.length}`, 'success');
+            document.getElementById('totalPOIs').textContent = poiData.length;
+            document.getElementById('sessionPOIs').textContent = sessionCount;
+            resetForm();
+        };
+        
+        document.getElementById('kmlUpload').onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+                    if (kmlLayer) map.removeLayer(kmlLayer);
+                    kmlLayer = L.layerGroup().addTo(map);
+                    const placemarks = xmlDoc.getElementsByTagName('Placemark');
+                    let count = 0, allBounds = [];
+                    for (let i = 0; i < placemarks.length; i++) {
+                        const placemark = placemarks[i];
+                        const name = placemark.getElementsByTagName('name')[0]?.textContent || 'Feature';
+                        const point = placemark.getElementsByTagName('Point')[0];
+                        if (point) {
+                            const coords = point.getElementsByTagName('coordinates')[0]?.textContent;
+                            if (coords) {
+                                const parts = coords.trim().split(',');
+                                const lng = parseFloat(parts[0]), lat = parseFloat(parts[1]);
+                                if (!isNaN(lat) && !isNaN(lng)) {
+                                    L.marker([lat, lng], {
+                                        icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41]})
+                                    }).addTo(kmlLayer).bindPopup(name);
+                                    allBounds.push([lat, lng]);
+                                    count++;
+                                }
+                            }
+                        }
+                        const polygon = placemark.getElementsByTagName('Polygon')[0];
+                        if (polygon) {
+                            const linearRing = polygon.getElementsByTagName('LinearRing')[0];
+                            if (linearRing) {
+                                const coords = linearRing.getElementsByTagName('coordinates')[0]?.textContent;
+                                if (coords) {
+                                    const latlngs = [];
+                                    coords.trim().split(/\s+/).forEach(pair => {
+                                        const parts = pair.split(',');
+                                        if (parts.length >= 2) {
+                                            const lng = parseFloat(parts[0]), lat = parseFloat(parts[1]);
+                                            if (!isNaN(lat) && !isNaN(lng)) {
+                                                latlngs.push([lat, lng]);
+                                                allBounds.push([lat, lng]);
+                                            }
+                                        }
+                                    });
+                                    if (latlngs.length >= 3) {
+                                        L.polygon(latlngs, {color: '#27ae60', fillColor: '#2ecc71', fillOpacity: 0.35, weight: 3}).addTo(kmlLayer).bindPopup(name);
+                                        count++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    document.getElementById('kmlStatus').textContent = `${file.name}: ${count} features loaded`;
+                    document.getElementById('kmlStatus').style.display = 'block';
+                    showAlert(`KML loaded: ${count} features`, 'success');
+                    if (allBounds.length > 0) setTimeout(() => map.fitBounds(L.latLngBounds(allBounds), {padding: [50, 50], maxZoom: 15}), 200);
+                } catch(error) {
+                    showAlert('Error loading KML', 'danger');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        const saved = localStorage.getItem('poiData');
+        if (saved) {
+            poiData = JSON.parse(saved);
+            document.getElementById('totalPOIs').textContent = poiData.length;
+        }
+        
+        console.log('✓ Map ready!');
+        showAlert('✓ Map loaded! Click to start.', 'success');
+    } catch(e) {
+        console.error('Init error:', e);
+        showAlert('Error loading map. Please refresh.', 'danger');
+    }
+};
+
+function resetForm() {
+    document.getElementById('poiForm').reset();
+    document.getElementById('buildLat').value = '';
+    document.getElementById('buildLon').value = '';
+    document.getElementById('displayLat').value = '';
+    document.getElementById('displayLon').value = '';
+    if (buildingMarker) { map.removeLayer(buildingMarker); buildingMarker = null; }
+    if (displayMarker) { map.removeLayer(displayMarker); displayMarker = null; }
+    clickCount = 0;
+}
+
+function exportToExcel() {
+    if (poiData.length === 0) return showAlert('No data to export!', 'danger');
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(poiData.map(poi => ({
+        POI_NAME: poi.POI_NAME, CATEGORY: poi.CATEGORY, SUB_CAT: poi.SUB_CAT,
+        LANDLINE: poi.LANDLINE, MOBILE: poi.MOBILE, MOBILE_1: poi.MOBILE_1,
+        BUILD_LATE: poi.BUILD_LAT, BUILD_LONE: poi.BUILD_LON,
+        DISPLAY_LATE: poi.DISPLAY_LAT, DISPLAY_LONE: poi.DISPLAY_LON,
+        TIMESTAMP: poi.TIMESTAMP
+    })));
+    XLSX.utils.book_append_sheet(wb, ws, 'POI Data');
+    XLSX.writeFile(wb, `POI_Data_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showAlert(`Exported ${poiData.length} POIs`, 'success');
+}
+
+function showAlert(msg, type) {
+    const alert = document.getElementById('alertBox');
+    alert.className = `alert alert-${type}`;
+    alert.textContent = msg;
+    alert.style.display = 'block';
+    setTimeout(() => alert.style.display = 'none', 4000);
+}
+    </script>
 </body>
 </html>
